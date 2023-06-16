@@ -2,6 +2,14 @@ controllers:
     resource: ../src/Controller/
     type: annotation
 
+jwt_auth:
+    path: /auth
+
 kernel:
     resource: ../src/Kernel.php
     type: annotation
+
+app.swagger_ui.seller:
+    path: /doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
