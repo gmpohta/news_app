@@ -20,6 +20,10 @@ class News
     #[ORM\Column(type: Types::TEXT)]
     private $body;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(referencedColumnName: "id", onDelete: "SET NULL")]
+    private $user;
+
     public function getId(): int
     {
         return $this->id;
