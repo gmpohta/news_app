@@ -20,8 +20,15 @@ class News
     #[ORM\Column(type: Types::TEXT)]
     private $body;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(referencedColumnName: "id", onDelete: "SET NULL")]
+    #[ORM\ManyToOne(
+        targetEntity: User::class, 
+        inversedBy: "news", 
+        cascade: ["persist"]
+    )]
+    #[ORM\JoinColumn(
+        referencedColumnName: "id", 
+        onDelete: "CASCADE"
+    )]
     private $user;
 
     public function getId(): int

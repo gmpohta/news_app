@@ -23,12 +23,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(message: 'The email {{ value }} is not a valid email.')] 
     #[ORM\Column(type: Types::STRING, length:255, unique: true)]
     private string $email;
-    
+
     #[ORM\Column(type: Types::STRING)]
     private string $password;
     
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    #[ORM\OneToMany(
+        targetEntity: News::class, 
+        mappedBy: "user", 
+        cascade: ["persist", "remove"], 
+        orphanRemoval: true
+    )]
+    private $news;
 
     public function getId(): int
     {

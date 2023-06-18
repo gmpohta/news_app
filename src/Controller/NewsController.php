@@ -68,15 +68,17 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_CREATED,
         description: "Returned when new news is success created",
     )]
-    #[OA\Parameter(
-        name: 'create_news',
+    #[OA\RequestBody(
         description: 'Create news',
-        in: 'query',
         content: new Model(type: NewsModel::class)
     )]
     public function createAction(Request $request)
     {
-        return new JsonResponse(['create'], 200);
+        return new JsonResponse($this->newsService->createNews(
+            $request->request->get('name'),
+            $request->request->get('body'),
+            $request->headers->get('Authorization'),
+        ));
     }
 
     #[Route('/edit/{news}', methods: ['PATCH'])] 
@@ -98,10 +100,8 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_OK,
         description: "Returned when new news is success edited",
     )]
-    #[OA\Parameter(
-        name: 'edit_news',
+    #[OA\RequestBody(
         description: 'Edit news',
-        in: 'query',
         content: new Model(type: NewsModel::class)
     )]
     public function updateAction(Request $request, News $news)
