@@ -55,7 +55,6 @@ class NewsController extends AbstractController
 
     #[Route('/create', methods: ['POST'])] 
     #[OA\Tag(name: 'news')]
-    #[Security(name: 'Bearer')]
     #[OA\Response(
         response: JsonResponse::HTTP_BAD_REQUEST,
         description: "Returned when input data not valid",
@@ -84,7 +83,6 @@ class NewsController extends AbstractController
 
     #[Route('/edit/{news}', methods: ['PATCH'])] 
     #[OA\Tag(name: 'news')]
-    #[Security(name: 'Bearer')]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
         description: "Returned when authorization is required",
@@ -112,7 +110,6 @@ class NewsController extends AbstractController
 
     #[Route('/delete/{news}', methods: ['DELETE'])] 
     #[OA\Tag(name: 'news')]
-    #[Security(name: 'Bearer')]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
         description: "Returned when authorization is required",

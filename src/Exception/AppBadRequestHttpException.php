@@ -15,6 +15,6 @@ class AppBadRequestHttpException extends BadRequestHttpException {
 
     public function getErrors(): ?array 
     {
-        return $this->$errors
+        return $this->errors;
     }
 }
