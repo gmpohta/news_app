@@ -33,20 +33,20 @@ class SecurityController extends AbstractController
     #[OA\RequestBody(
         content: new Model(type: SecurityModel::class)
     )]
-    public function registerAction(Request $request): JsonResponse
+    public function register(Request $request): JsonResponse
     {
         $params = json_decode($request->getContent(), true);
         try {
-            $user = $this->securityService->regiserUser(
+            $token = $this->securityService->regiserUser(
                 $params['email'],
                 $params['password'],
             );
         } catch (BadRequestHttpException $ex) {
-            return new JsonResponse(['errors' => $ex->errors], JsonResponse::HTTP_BAD_REQUEST);
+            return new JsonResponse(['errors' => $ex->getErrors()], JsonResponse::HTTP_BAD_REQUEST);
         }
 
         return new JsonResponse(
-            ['token' => $user], 
+            ['token' => $token], 
             JsonResponse::HTTP_CREATED
         );
     }
@@ -61,13 +61,23 @@ class SecurityController extends AbstractController
         response: JsonResponse::HTTP_BAD_REQUEST,
         description: "Returned when input data not valid",
     )]
-    public function loginAction(Request $request)
+    #[OA\RequestBody(
+        content: new Model(type: SecurityModel::class)
+    )]
+    public function login(Request $request): JsonResponse
     {
+        $params = json_decode($request->getContent(), true);
+        try {
+            $token = $this->securityService->loginUser(
+                $params['email'],
+                $params['password'],
+            );
+        } catch (BadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
+        }
+        
         return new JsonResponse(
-            $this->securityService->loginUser(
-                $request->get('email'),
-                $request->get('password'),
-            ), 
+            ['token' => $token], 
             JsonResponse::HTTP_ACCEPTED
         );
     }

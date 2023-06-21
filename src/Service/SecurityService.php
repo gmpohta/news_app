@@ -24,6 +24,7 @@ class SecurityService
     {
         $user = new User();
         $user->setEmail($email);
+        $user->setPlainPasswordForCheck($password);
         $user->setPassword(
             $this->passwordHasher->hashPassword(
                 $user, 
@@ -59,16 +60,14 @@ class SecurityService
             ])
         ;
 
-        if (!$user) {
-            return new Response('User not found', JsonResponse::HTTP_NOT_FOUND);
+        if (empty($user)) {
+            throw new AppBadRequestHttpException($errors = ['User not found'], $code = JsonResponse::HTTP_NOT_FOUND);
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
-            return new Response('Invalid credentials', Response::HTTP_BAD_REQUEST);
+            throw new AppBadRequestHttpException($errors = ['Invalid credentials'], $code = JsonResponse::HTTP_NOT_FOUND);
         }
 
-        return new JWTAuthenticatedToken(
-            $this->jwtManager->create($user)
-        );
+        return $this->jwtManager->create($user);
     }
 }

@@ -74,6 +74,7 @@ class NewsController extends AbstractController
     )]
     public function createAction(Request $request)
     {
+        dump($request->headers->get('Authorization'));
         return new JsonResponse($this->newsService->createNews(
             $request->request->get('name'),
             $request->request->get('body'),

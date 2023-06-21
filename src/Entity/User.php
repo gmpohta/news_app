@@ -19,14 +19,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::INTEGER)]
     private int $id;
 
+    #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     #[Assert\Email(message: 'The email {{ value }} is not a valid email.')] 
     #[ORM\Column(type: Types::STRING, length:255, unique: true)]
     private string $email;
 
-    #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING)]
     private string $password;
+
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 6)]
+    private string $plainPassword;
     
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -66,6 +70,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    // 
+    public function setPlainPasswordForCheck(string $password): self
+    {
+        $this->plainPassword = $password;
+
+        return $this;
     }
 
     public function getRoles(): array
