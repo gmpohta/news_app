@@ -3,11 +3,13 @@
 namespace App\Service;
 
 use App\Entity\User;
+use AppBundle\Exception\AppBadRequestHttpException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\ConstraintViolationList;
 
 class SecurityService
 {
@@ -18,7 +20,7 @@ class SecurityService
         private ValidatorInterface $validator
     ) {}
 
-    public function regiserUser(string $email, string $password) : string
+    public function regiserUser(string $email, string $password): string
     {
         $user = new User();
         $user->setEmail($email);
@@ -29,9 +31,17 @@ class SecurityService
             )
         );
 
-        $errors = $this->validator->validate($user);
-        if (count($errors) > 0) {
-            return new JsonResponse($errors, JsonResponse::HTTP_BAD_REQUEST);
+        $violations = $this->validator->validate($user);
+        
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = [
+                    $violation->getPropertyPath() => $violation->getMessage()
+                ];
+            }
+
+            throw new AppBadRequestHttpException($errors);
         }
 
         $this->em->persist($user);

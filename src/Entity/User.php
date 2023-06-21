@@ -24,6 +24,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, length:255, unique: true)]
     private string $email;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::STRING)]
     private string $password;
     

@@ -7,6 +7,7 @@ use App\Model\SecurityModel;
 use App\Service\SecurityService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,15 +30,23 @@ class SecurityController extends AbstractController
         response: JsonResponse::HTTP_BAD_REQUEST,
         description: "Returned when input data not valid",
     )]
-    public function registerAction(Request $request)
+    #[OA\RequestBody(
+        content: new Model(type: SecurityModel::class)
+    )]
+    public function registerAction(Request $request): JsonResponse
     {
-        $user = $this->securityService->regiserUser(
-            $request->request->get('email'),
-            $request->request->get('password'),
-        );
+        $params = json_decode($request->getContent(), true);
+        try {
+            $user = $this->securityService->regiserUser(
+                $params['email'],
+                $params['password'],
+            );
+        } catch (BadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->errors], JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         return new JsonResponse(
-            ['email' => $user->getEmail()], 
+            ['token' => $user], 
             JsonResponse::HTTP_CREATED
         );
     }
