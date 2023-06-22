@@ -10,6 +10,8 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\FormInterface;
 
 class NewsService
 {
@@ -20,9 +22,36 @@ class NewsService
         private ValidatorInterface $validator,
     ) {}
     
-    public function getNewsWithParam(array $param, int $limit, int $offset): ?array
+    /*public function getNewsWithParam(array $param, int $limit, int $offset): ?array
     {
         return $this->em->getRepository(News::class)->getNewsWithParam($param, $limit, $offset);
+    }*/
+
+    public function getNewsWithParam(FormInterface $form): ?array
+    {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            
+            return $this->em->getRepository(News::class)
+                ->getNewsWithParam(
+                    [], 
+                    $data['limit'], 
+                    $data['offset']
+                );
+        } 
+
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
+        
+        if (count($errors) > 0) {
+            throw new AppBadRequestHttpException(
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
     }
 
     public function createNews(string $name, string $body): ?bool

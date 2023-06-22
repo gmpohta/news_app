@@ -8,7 +8,6 @@ use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-#[ORM\Entity]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 #[ORM\Table(name:"news")]
 #[UniqueEntity(fields: "name", message: "The news with same name already exist")]

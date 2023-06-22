@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Model\SecurityModel;
+use App\Model\Security\SecurityModel;
 use App\Service\SecurityService;
 use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;

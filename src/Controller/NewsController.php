@@ -3,8 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\News;
-use App\Model\NewsModel;
-use App\Model\ReadNewsModel;
+use App\Model\News\NewsModel;
+use App\Model\News\ReadNewsModel;
+use App\Model\News\ReadNewsRequestModel;
 use App\Service\NewsService;
 use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;
@@ -55,21 +56,21 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: ReadNewsModel::class)
     )]
+    #[OA\RequestBody(
+        description: 'Create news',
+        content: new Model(type: ReadNewsRequestModel::class)
+    )]
     public function readNews(Request $request): JsonResponse
     {
-        $params = json_decode($request->getContent(), true); //add validate input
+        $form = $this->createForm(ReadNewsRequestModel::class);
+        $form->submit(json_decode($request->getContent(), true));
+        
         try {
-            $data = $this->newsService->getNewsWithParam(
-                [
-                    'userId' => $params['userId']
-                ],
-                $params['limit'],
-                $params['offset'],
-            );
+            $data = $this->newsService->getNewsWithParam($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        
+        dump($data);
         return new JsonResponse([
             'data' => $data
         ], JsonResponse::HTTP_OK);
