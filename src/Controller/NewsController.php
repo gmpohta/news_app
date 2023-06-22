@@ -35,12 +35,10 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: NewsModel::class)
     )]
-    public function readNewsById(Request $request): JsonResponse
+    public function readNewsById(Request $request, $newsId): JsonResponse
     {
         try {
-            $data = $this->newsService->getNewsById(
-                $request->query->getInt('newsId')
-            );
+            $data = $this->newsService->getNewsById((int)$newsId);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
@@ -138,21 +136,19 @@ class NewsController extends AbstractController
         description: 'Edit news',
         content: new Model(type: NewsModel::class)
     )]
-    public function patchNews(Request $request, int $newsId)
+    public function patchNews(Request $request, $newsId)
     {    
-        $params = json_decode($request->getContent(), true); //add validate input
+        $form = $this->createForm(NewsModel::class, new News);
+        $form->submit(json_decode($request->getContent(), true));
+
         try {
-            $success = $this->newsService->patchNews(
-                $params['name'],
-                $params['body'],
-                $newsId
-            );
+            $data = $this->newsService->patchNews($form, (int)$newsId);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        
+
         return new JsonResponse([
-            'data' => $success
+            'data' => $data
         ], JsonResponse::HTTP_OK);
     }
 
@@ -170,12 +166,10 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_OK,
         description: "Returned when new news is success deleted",
     )]
-    public function deleteNews(Request $request)
+    public function deleteNews(Request $request, $newsId)
     {
         try {
-            $success = $this->newsService->deleteNews(
-                $request->query->getInt('newsId')
-            );
+            $success = $this->newsService->deleteNews((int)$newsId);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }

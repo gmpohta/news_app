@@ -99,7 +99,7 @@ class NewsService
         }
     }
 
-    public function patchNews(?string $name, ?string $body, int $newsId): ?bool
+    public function patchNews(FormInterface $form, int $newsId): ?bool
     {
         $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
         $user = $this->em->getRepository(User::class)->findOneBy([
@@ -129,34 +129,35 @@ class NewsService
             );
         }
 
-        if ($name) {
-            $news->setName($name);
-        }
-
-        if ($body) {
-            $news->setBody($body);
-        }
-        
-        $violations = $this->validator->validate($news);
-
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = [
-                    $violation->getPropertyPath() => $violation->getMessage()
-                ];
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+    
+            if ($formData->getName()) {
+                $news->setName($formData->getName());
+            }
+    
+            if ($formData->getBody()) {
+                $news->setBody($formData->getBody());
             }
 
+            $this->em->persist($news);
+            $this->em->flush();
+    
+            return true;
+        } 
+
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
+        
+        if (count($errors) > 0) {
             throw new AppBadRequestHttpException(
                 errors: $errors, 
                 code: JsonResponse::HTTP_BAD_REQUEST
             );
         }
-
-        $this->em->persist($news);
-        $this->em->flush();
-
-        return true;
     }
 
     public function deleteNews(int $newsId): ?bool
@@ -193,5 +194,21 @@ class NewsService
         $this->em->flush();
 
         return true;
+    }
+
+    private function validateForm(): void
+    {
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
+        
+        if (count($errors) > 0) {
+            throw new AppBadRequestHttpException(
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
     }
 }
