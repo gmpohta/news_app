@@ -10,7 +10,11 @@ docker-build-backend:
 	docker-compose run --rm php-fpm composer install --no-interaction -o
 .PHONY: docker-build-backend
 
-docker-install: up docker-build-backend docker-init-db
+docker-create-jwt-keypair:
+	docker-compose run --rm php-fpm php bin/console lexik:jwt:generate-keypair
+.PHONY: docker-create-jwt-keypair
+
+docker-install: up docker-build-backend docker-create-jwt-keypair docker-init-db
 	$(info === Проект собран и запущен ===)
 .PHONY: docker-install
 
