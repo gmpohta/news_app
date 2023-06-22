@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Model\Security\SecurityModel;
+use App\Model\Security\SecurityRegisterModel;
+use App\Model\Security\SecurityLoginModel;
 use App\Service\SecurityService;
 use App\Exception\AppBadRequestHttpException;
 use App\Entity\User;
@@ -33,11 +34,11 @@ class SecurityController extends AbstractController
         description: "Returned when input data not valid",
     )]
     #[OA\RequestBody(
-        content: new Model(type: SecurityModel::class)
+        content: new Model(type: SecurityRegisterModel::class)
     )]
     public function register(Request $request): JsonResponse
     {
-        $form = $this->createForm(SecurityModel::class, new User);
+        $form = $this->createForm(SecurityRegisterModel::class, new User);
         $form->submit(json_decode($request->getContent(), true));
 
         try {
@@ -63,23 +64,22 @@ class SecurityController extends AbstractController
         description: "Returned when input data not valid",
     )]
     #[OA\RequestBody(
-        content: new Model(type: SecurityModel::class)
+        content: new Model(type: SecurityLoginModel::class)
     )]
     public function login(Request $request): JsonResponse
     {
-        $params = json_decode($request->getContent(), true); //add validate input
+        $form = $this->createForm(SecurityLoginModel::class);
+        $form->submit(json_decode($request->getContent(), true));
+
         try {
-            $token = $this->securityService->loginUser(
-                $params['email'],
-                $params['password'],
-            );
+            $token = $this->securityService->loginUser($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        
+
         return new JsonResponse([
             'token' => $token
-        ], JsonResponse::HTTP_OK);
+        ], JsonResponse::HTTP_CREATED);
     }
 }
 

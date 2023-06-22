@@ -51,29 +51,46 @@ class SecurityService
         }
     }
 
-    public function loginUser(string $email, string $password): string
+    public function loginUser(FormInterface $form): string
     {
-        $user = $this->em
-            ->getRepository(User::class)
-            ->findOneBy([
-                'email' => $email
-            ])
-        ;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+    
+            $user = $this->em
+                ->getRepository(User::class)
+                ->findOneBy([
+                    'email' => $formData['email']
+                ])
+            ;
 
-        if (empty($user)) {
+            if (empty($user)) {
+                throw new AppBadRequestHttpException(
+                    errors: ['User not found'], 
+                    code: JsonResponse::HTTP_NOT_FOUND
+                );
+            }
+
+            if (!$this->passwordHasher->isPasswordValid($user, $formData['password'])) {
+                throw new AppBadRequestHttpException(
+                    errors: ['Invalid credentials'], 
+                    code: JsonResponse::HTTP_UNAUTHORIZED
+                );
+            }
+
+            return $this->jwtManager->create($user);
+        } 
+
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
+        
+        if (count($errors) > 0) {
             throw new AppBadRequestHttpException(
-                errors: ['User not found'], 
-                code: JsonResponse::HTTP_NOT_FOUND
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
             );
         }
-
-        if (!$this->passwordHasher->isPasswordValid($user, $password)) {
-            throw new AppBadRequestHttpException(
-                errors: ['Invalid credentials'], 
-                code: JsonResponse::HTTP_NOT_FOUND
-            );
-        }
-
-        return $this->jwtManager->create($user);
     }
 }
