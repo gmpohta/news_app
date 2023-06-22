@@ -9,6 +9,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Form\FormInterface;
 
 class SecurityService
 {
@@ -19,38 +20,35 @@ class SecurityService
         private ValidatorInterface $validator,
     ) {}
 
-    public function regiserUser(string $email, string $password): string
+    public function regiserUser(FormInterface $form): string
     {
-        $user = new User();
-        $user->setEmail($email);
-        $user->setPlainPasswordForCheck($password);
-        $user->setPassword(
-            $this->passwordHasher->hashPassword(
-                $user, 
-                $password
-            )
-        );
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+            $user->setPassword(
+                $this->passwordHasher->hashPassword(
+                    $user, 
+                    $user->getPassword()
+                )
+            );
+    
+            $this->em->persist($user);
+            $this->em->flush();
+    
+            return $this->jwtManager->create($user);
+        } 
 
-        $violations = $this->validator->validate($user);
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
         
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = [
-                    $violation->getPropertyPath() => $violation->getMessage()
-                ];
-            }
-
+        if (count($errors) > 0) {
             throw new AppBadRequestHttpException(
                 errors: $errors, 
                 code: JsonResponse::HTTP_BAD_REQUEST
             );
         }
-
-        $this->em->persist($user);
-        $this->em->flush();
-
-        return $this->jwtManager->create($user);
     }
 
     public function loginUser(string $email, string $password): string

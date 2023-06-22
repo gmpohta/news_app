@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Model\Security\SecurityModel;
 use App\Service\SecurityService;
 use App\Exception\AppBadRequestHttpException;
+use App\Entity\User;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,20 +37,18 @@ class SecurityController extends AbstractController
     )]
     public function register(Request $request): JsonResponse
     {
-        $params = json_decode($request->getContent(), true);//add validate input
+        $form = $this->createForm(SecurityModel::class, new User);
+        $form->submit(json_decode($request->getContent(), true));
+
         try {
-            $token = $this->securityService->regiserUser(
-                $params['email'],
-                $params['password'],
-            );
+            $token = $this->securityService->regiserUser($form);
         } catch (AppBadRequestHttpException $ex) {
-            return new JsonResponse(['errors' => $ex->getErrors()], JsonResponse::HTTP_BAD_REQUEST);
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
 
-        return new JsonResponse(
-            ['token' => $token], 
-            JsonResponse::HTTP_CREATED
-        );
+        return new JsonResponse([
+            'token' => $token
+        ], JsonResponse::HTTP_CREATED);
     }
     
     #[Route('/login', name: 'login_user', methods: ['POST'])]
@@ -78,10 +77,9 @@ class SecurityController extends AbstractController
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
         
-        return new JsonResponse(
-            ['token' => $token], 
-            JsonResponse::HTTP_OK
-        );
+        return new JsonResponse([
+            'token' => $token
+        ], JsonResponse::HTTP_OK);
     }
 }
 

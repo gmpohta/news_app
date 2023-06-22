@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\DBAL\Types\Types;
@@ -19,18 +18,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::INTEGER)]
     private int $id;
 
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 255)]
-    #[Assert\Email(message: 'The email {{ value }} is not a valid email.')] 
     #[ORM\Column(type: Types::STRING, length:255, unique: true)]
     private string $email;
 
     #[ORM\Column(type: Types::STRING)]
     private string $password;
-
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 6)]
-    private string $plainPassword;
     
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -70,14 +62,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): string
     {
         return $this->password;
-    }
-
-    // This is used for password validation.
-    public function setPlainPasswordForCheck(string $password): self
-    {
-        $this->plainPassword = $password;
-
-        return $this;
     }
 
     public function getRoles(): array
