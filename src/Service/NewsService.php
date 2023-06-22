@@ -21,30 +21,17 @@ class NewsService
         private ValidatorInterface $validator,
     ) {}
     
-    public function getNewsById(FormInterface $form): ?array
+    public function getNewsById(int $newsId): ?array
     {
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+        $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
-            return $this->em
-                ->getRepository(News::class)
-                ->getOneBy([ 
-                    'id' => $data['newsId']
-                ]);
-        } 
-
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
+        if (empty($news)) {
             throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
+                errors: [sprintf('News with id %d not found', $newsId)], 
+                code: JsonResponse::HTTP_NOT_FOUND
             );
         }
+        return $news;
     }
 
     public function getNewsWithParam(FormInterface $form): ?array

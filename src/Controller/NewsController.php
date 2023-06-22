@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\News;
 use App\Model\News\NewsModel;
-use App\Model\News\ReadNewsModel;
+use App\Model\News\ReadNewsResponseModel;
 use App\Model\News\ReadNewsRequestModel;
 use App\Service\NewsService;
 use App\Exception\AppBadRequestHttpException;
@@ -35,13 +35,12 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: NewsModel::class)
     )]
-    public function readNewsById(Request $request, ?int $newsId): JsonResponse
+    public function readNewsById(Request $request): JsonResponse
     {
-        $form = $this->createForm(ReadNewsRequestModel::class);
-        $form->submit(json_decode($request->getContent(), true));
-
         try {
-            $data = $this->newsService->getNewsById($form);
+            $data = $this->newsService->getNewsById(
+                $request->query->getInt('newsId')
+            );
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
@@ -61,7 +60,7 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when success",
-        content: new Model(type: ReadNewsModel::class)
+        content: new Model(type: ReadNewsResponseModel::class)
     )]
     #[OA\RequestBody(
         description: 'Create news',
@@ -171,11 +170,12 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_OK,
         description: "Returned when new news is success deleted",
     )]
-    public function deleteNews(Request $request, int $newsId)
+    public function deleteNews(Request $request)
     {
-        //add validate input
         try {
-            $success = $this->newsService->deleteNews($newsId);
+            $success = $this->newsService->deleteNews(
+                $request->query->getInt('newsId')
+            );
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
