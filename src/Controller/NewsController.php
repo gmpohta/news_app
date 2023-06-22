@@ -35,13 +35,20 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: NewsModel::class)
     )]
-    public function readNewsById(Request $request, int $newsId): JsonResponse
+    public function readNewsById(Request $request, ?int $newsId): JsonResponse
     {
-        //add validate input
-        if (empty($newsId)) {
-            return new JsonResponse('News not found.', JsonResponse::HTTP_NOT_FOUND);
+        $form = $this->createForm(ReadNewsRequestModel::class);
+        $form->submit(json_decode($request->getContent(), true));
+
+        try {
+            $data = $this->newsService->getNewsById($form);
+        } catch (AppBadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        return new JsonResponse($news, JsonResponse::HTTP_OK);
+
+        return new JsonResponse([
+            'data' => $data
+        ], JsonResponse::HTTP_OK);
     }
 
     #[Route('/read', methods: ['POST'])] 
@@ -70,7 +77,7 @@ class NewsController extends AbstractController
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        dump($data);
+
         return new JsonResponse([
             'data' => $data
         ], JsonResponse::HTTP_OK);
