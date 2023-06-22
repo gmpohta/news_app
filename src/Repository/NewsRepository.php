@@ -30,6 +30,7 @@ class NewsRepository extends EntityRepository
         }
 
         return $queryBuilder
+            ->addOrderBy('n.name', 'ASC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()

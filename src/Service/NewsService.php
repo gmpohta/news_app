@@ -62,8 +62,6 @@ class NewsService
 
         $errors = [];
         foreach ($form->getErrors(true) as $error) {
-            dump($error->getOrigin());
-            dump($error->getMessage());
             $field = $error->getOrigin()->getName();
             $errors[$field] = $error->getMessage();
         }
@@ -76,7 +74,7 @@ class NewsService
         }
     }
 
-    public function createNews(string $name, string $body): ?bool
+    public function createNews(FormInterface $form): ?bool
     {
         $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
         $user = $this->em->getRepository(User::class)->findOneBy([
@@ -90,31 +88,28 @@ class NewsService
             );
         }
 
-        $news = new News();
-        $news->setName($name);
-        $news->setBody($body);
-        $news->setUser($user);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $news = $form->getData();
+            $news->setUser($user);
+    
+            $this->em->persist($news);
+            $this->em->flush();
+    
+            return true;
+        } 
 
-        $violations = $this->validator->validate($news);
-
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = [
-                    $violation->getPropertyPath() => $violation->getMessage()
-                ];
-            }
-
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $field = $error->getOrigin()->getName();
+            $errors[$field] = $error->getMessage();
+        }
+        
+        if (count($errors) > 0) {
             throw new AppBadRequestHttpException(
                 errors: $errors, 
                 code: JsonResponse::HTTP_BAD_REQUEST
             );
         }
-
-        $this->em->persist($news);
-        $this->em->flush();
-
-        return true;
     }
 
     public function patchNews(?string $name, ?string $body, int $newsId): ?bool

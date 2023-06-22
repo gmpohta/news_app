@@ -103,19 +103,18 @@ class NewsController extends AbstractController
     )]
     public function createNews(Request $request)
     {
-        $params = json_decode($request->getContent(), true); //add validate input
+        $form = $this->createForm(NewsModel::class, new News);
+        $form->submit(json_decode($request->getContent(), true));
+
         try {
-            $success = $this->newsService->createNews(
-                $params['name'],
-                $params['body'],
-            );
+            $data = $this->newsService->createNews($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
-        
+
         return new JsonResponse([
-            'data' => $success
-        ], JsonResponse::HTTP_CREATED);
+            'data' => $data
+        ], JsonResponse::HTTP_OK);
     }
 
     #[Route('/patch/{newsId}', methods: ['PATCH'])] 
