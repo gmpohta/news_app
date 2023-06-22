@@ -10,7 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class ReadNewsRequestModel extends AbstractType
+class ReadNewsModel extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

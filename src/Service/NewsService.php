@@ -8,7 +8,6 @@ use App\Exception\AppBadRequestHttpException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
 
@@ -18,7 +17,7 @@ class NewsService
         private EntityManagerInterface $em, 
         private JWTTokenManagerInterface $jwtManager,
         private TokenStorageInterface $tokenStorageInterface,
-        private ValidatorInterface $validator,
+        private UtilsService $utilsService,
     ) {}
     
     public function getNewsById(int $newsId): ?array
@@ -47,18 +46,7 @@ class NewsService
                 );
         } 
 
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
+        $this->utilsService->validateForm($form);
     }
 
     public function createNews(FormInterface $form): ?bool
@@ -85,18 +73,7 @@ class NewsService
             return true;
         } 
 
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
+        $this->utilsService->validateForm($form);
     }
 
     public function patchNews(FormInterface $form, int $newsId): ?bool
@@ -146,18 +123,7 @@ class NewsService
             return true;
         } 
 
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
+        $this->utilsService->validateForm($form);
     }
 
     public function deleteNews(int $newsId): ?bool
@@ -194,21 +160,5 @@ class NewsService
         $this->em->flush();
 
         return true;
-    }
-
-    private function validateForm(): void
-    {
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
     }
 }

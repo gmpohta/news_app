@@ -9,7 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class NewsModel extends AbstractType
+class PatchNewsModel extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

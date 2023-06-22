@@ -7,7 +7,6 @@ use App\Exception\AppBadRequestHttpException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
 
@@ -17,7 +16,7 @@ class SecurityService
         private EntityManagerInterface $em, 
         private JWTTokenManagerInterface $jwtManager,
         private UserPasswordHasherInterface $passwordHasher,
-        private ValidatorInterface $validator,
+        private UtilsService $utilsService,
     ) {}
 
     public function regiserUser(FormInterface $form): string
@@ -37,18 +36,7 @@ class SecurityService
             return $this->jwtManager->create($user);
         } 
 
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
+        $this->utilsService->validateForm($form);
     }
 
     public function loginUser(FormInterface $form): string
@@ -80,17 +68,6 @@ class SecurityService
             return $this->jwtManager->create($user);
         } 
 
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $field = $error->getOrigin()->getName();
-            $errors[$field] = $error->getMessage();
-        }
-        
-        if (count($errors) > 0) {
-            throw new AppBadRequestHttpException(
-                errors: $errors, 
-                code: JsonResponse::HTTP_BAD_REQUEST
-            );
-        }
+        $this->utilsService->validateForm($form);
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\News;
-use App\Model\News\NewsModel;
-use App\Model\News\ReadNewsResponseModel;
-use App\Model\News\ReadNewsRequestModel;
+use App\Model\News\CreateNewsModel;
+use App\Model\News\PatchNewsModel;
+use App\Model\News\ReadNewsModel;
 use App\Service\NewsService;
 use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;
@@ -33,7 +33,6 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when success",
-        content: new Model(type: NewsModel::class)
     )]
     public function readNewsById(Request $request, $newsId): JsonResponse
     {
@@ -58,15 +57,14 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when success",
-        content: new Model(type: ReadNewsResponseModel::class)
     )]
     #[OA\RequestBody(
         description: 'Create news',
-        content: new Model(type: ReadNewsRequestModel::class)
+        content: new Model(type: ReadNewsModel::class)
     )]
     public function readNews(Request $request): JsonResponse
     {
-        $form = $this->createForm(ReadNewsRequestModel::class);
+        $form = $this->createForm(ReadNewsModel::class);
         $form->submit(json_decode($request->getContent(), true));
         
         try {
@@ -96,11 +94,11 @@ class NewsController extends AbstractController
     )]
     #[OA\RequestBody(
         description: 'Create news',
-        content: new Model(type: NewsModel::class)
+        content: new Model(type: CreateNewsModel::class)
     )]
     public function createNews(Request $request)
     {
-        $form = $this->createForm(NewsModel::class, new News);
+        $form = $this->createForm(CreateNewsModel::class, new News);
         $form->submit(json_decode($request->getContent(), true));
 
         try {
@@ -134,11 +132,11 @@ class NewsController extends AbstractController
     )]
     #[OA\RequestBody(
         description: 'Edit news',
-        content: new Model(type: NewsModel::class)
+        content: new Model(type: PatchNewsModel::class)
     )]
     public function patchNews(Request $request, $newsId)
     {    
-        $form = $this->createForm(NewsModel::class, new News);
+        $form = $this->createForm(PatchNewsModel::class, new News);
         $form->submit(json_decode($request->getContent(), true));
 
         try {
