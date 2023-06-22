@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 
 #[Route('/auth')] 
 class SecurityController extends AbstractController
@@ -21,6 +22,7 @@ class SecurityController extends AbstractController
 
     #[Route("/register", name: "register_user", methods: ["POST"])]
     #[OA\Tag(name: 'security')]
+    #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_CREATED,
         description: "Returned when register new user",
@@ -52,6 +54,7 @@ class SecurityController extends AbstractController
     
     #[Route('/login', name: 'login_user', methods: ['POST'])]
     #[OA\Tag(name: 'security')]
+    #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when user login",

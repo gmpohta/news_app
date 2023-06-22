@@ -24,6 +24,7 @@ class NewsController extends AbstractController
     
     #[Route('/read/{newsId}', methods: ['GET'])] 
     #[OA\Tag(name: 'news')]
+    #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_NOT_FOUND,
         description: "Returned when news not found",
@@ -44,6 +45,7 @@ class NewsController extends AbstractController
 
     #[Route('/read', methods: ['POST'])] 
     #[OA\Tag(name: 'news')]
+    #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_NOT_FOUND,
         description: "Returned when not found",
@@ -57,8 +59,10 @@ class NewsController extends AbstractController
     {
         $params = json_decode($request->getContent(), true); //add validate input
         try {
-            $success = $this->newsService->getNews(
-                $params['userId'],
+            $data = $this->newsService->getNewsWithParam(
+                [
+                    'userId' => $params['userId']
+                ],
                 $params['limit'],
                 $params['offset'],
             );
@@ -67,7 +71,7 @@ class NewsController extends AbstractController
         }
         
         return new JsonResponse([
-            'success' => $success
+            'data' => $data
         ], JsonResponse::HTTP_OK);
     }
 
@@ -102,7 +106,7 @@ class NewsController extends AbstractController
         }
         
         return new JsonResponse([
-            'success' => $success
+            'data' => $success
         ], JsonResponse::HTTP_CREATED);
     }
 
@@ -142,7 +146,7 @@ class NewsController extends AbstractController
         }
         
         return new JsonResponse([
-            'success' => $success
+            'data' => $success
         ], JsonResponse::HTTP_OK);
     }
 
@@ -170,7 +174,7 @@ class NewsController extends AbstractController
         }
         
         return new JsonResponse([
-            'success' => $success
+            'data' => $success
         ], JsonResponse::HTTP_OK);
     }
 }

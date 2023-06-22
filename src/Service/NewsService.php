@@ -20,6 +20,11 @@ class NewsService
         private ValidatorInterface $validator,
     ) {}
     
+    public function getNewsWithParam(array $param, int $limit, int $offset): ?array
+    {
+        return $this->em->getRepository(News::class)->getNewsWithParam($param, $limit, $offset);
+    }
+
     public function createNews(string $name, string $body): ?bool
     {
         $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
@@ -66,7 +71,7 @@ class NewsService
             throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $news = $this->em->getRepository(News::class)->findOneById($newsId);
+        $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
         if (empty($news)) {
             throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
@@ -114,7 +119,7 @@ class NewsService
             throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $news = $this->em->getRepository(News::class)->findOneById($newsId);
+        $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
         if (empty($news)) {
             throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
