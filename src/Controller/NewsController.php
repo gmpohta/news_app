@@ -6,6 +6,7 @@ use App\Entity\News;
 use App\Model\NewsModel;
 use App\Model\ReadNewsModel;
 use App\Service\NewsService;
+use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,9 +33,12 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: NewsModel::class)
     )]
-    public function readOneAction(Request $request, News $news): JsonResponse
+    public function readNewsById(Request $request, int $news): JsonResponse
     {
-        return new JsonResponse(['news' => 'read'], 200);
+        if (empty($news)) {
+            return new JsonResponse('News not found.', JsonResponse::HTTP_NOT_FOUND);
+        }
+        return new JsonResponse($news, JsonResponse::HTTP_OK);
     }
 
     #[Route('/read', methods: ['POST'])] 
@@ -48,9 +52,11 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: ReadNewsModel::class)
     )]
-    public function readAction(Request $request): JsonResponse
+    public function readNews(Request $request): JsonResponse
     {
-        return new JsonResponse(['news' => 'read'], 200);
+        $data = $this->em->getRepository(News::class)->getNews($queryParam, $limit, $offset);
+
+        return new JsonResponse($data, JsonResponse::HTTP_OK);
     }
 
     #[Route('/create', methods: ['POST'])] 
@@ -71,14 +77,21 @@ class NewsController extends AbstractController
         description: 'Create news',
         content: new Model(type: NewsModel::class)
     )]
-    public function createAction(Request $request)
+    public function createNews(Request $request)
     {
-        dump($request->headers->get('Authorization'));
-        return new JsonResponse($this->newsService->createNews(
-            $request->request->get('name'),
-            $request->request->get('body'),
-            $request->headers->get('Authorization'),
-        ));
+        $params = json_decode($request->getContent(), true); ///???????????
+        try {
+            $success = $this->newsService->createNews(
+                $params['name'],
+                $params['body'],
+            );
+        } catch (AppBadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
+        }
+        
+        return new JsonResponse([
+            'success' => $success
+        ], JsonResponse::HTTP_CREATED);
     }
 
     #[Route('/edit/{news}', methods: ['PATCH'])] 
@@ -103,9 +116,9 @@ class NewsController extends AbstractController
         description: 'Edit news',
         content: new Model(type: NewsModel::class)
     )]
-    public function updateAction(Request $request, News $news)
+    public function updateNews(Request $request, News $news)
     {    
-        return new JsonResponse(['edit'], 200);
+        return new JsonResponse(['edit'], JsonResponse::HTTP_OK);
     }
 
     #[Route('/delete/{news}', methods: ['DELETE'])] 
@@ -122,8 +135,22 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_OK,
         description: "Returned when new news is success deleted",
     )]
-    public function deleteAction(Request $request, News $news)
+    public function deleteNews(Request $request, News $news)
     {
+        $params = json_decode($request->getContent(), true); ///???????????
+        try {
+            $success = $this->newsService->createNews(
+                $params['name'],
+                $params['body'],
+            );
+        } catch (AppBadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
+        }
+        
+        return new JsonResponse([
+            'success' => $success
+            ], JsonResponse::HTTP_CREATED
+        );
         return new JsonResponse($this->newsService->delete($news), JsonResponse::HTTP_OK);
     }
 }

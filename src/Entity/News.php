@@ -4,9 +4,11 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity]
 #[ORM\Table(name:"news")]
+#[UniqueEntity(fields: "name", message: "The news with same name already exist")]
 class News
 {
     #[ORM\Id]
@@ -29,7 +31,7 @@ class News
         referencedColumnName: "id", 
         onDelete: "CASCADE"
     )]
-    private $user;
+    private User $user;
 
     public function getId(): int
     {
@@ -63,6 +65,18 @@ class News
     public function setBody(string $body): self
     {
         $this->body = $body;
+
+        return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

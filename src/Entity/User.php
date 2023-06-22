@@ -72,7 +72,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    // 
+    // This is used for password validation.
     public function setPlainPasswordForCheck(string $password): self
     {
         $this->plainPassword = $password;

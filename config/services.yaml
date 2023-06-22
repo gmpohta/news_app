@@ -8,6 +8,8 @@ services:
         exclude: '../src/{
             DependencyInjection,
             Entity,
+            Exception,
+            Model,
             Migrations,
             Tests,
             Kernel.php

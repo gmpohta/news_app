@@ -11,7 +11,7 @@ docker-build-backend:
 .PHONY: docker-build-backend
 
 docker-create-jwt-keypair:
-	docker-compose run --rm php-fpm php bin/console lexik:jwt:generate-keypair
+	docker-compose run --rm php-fpm php bin/console lexik:jwt:generate-keypair --skip-if-exists
 .PHONY: docker-create-jwt-keypair
 
 docker-install: up docker-build-backend docker-create-jwt-keypair docker-init-db

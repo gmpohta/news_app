@@ -3,13 +3,12 @@
 namespace App\Service;
 
 use App\Entity\User;
-use AppBundle\Exception\AppBadRequestHttpException;
+use App\Exception\AppBadRequestHttpException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Validator\ConstraintViolationList;
 
 class SecurityService
 {
@@ -17,7 +16,7 @@ class SecurityService
         private EntityManagerInterface $em, 
         private JWTTokenManagerInterface $jwtManager,
         private UserPasswordHasherInterface $passwordHasher,
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
     ) {}
 
     public function regiserUser(string $email, string $password): string
@@ -42,7 +41,7 @@ class SecurityService
                 ];
             }
 
-            throw new AppBadRequestHttpException($errors);
+            throw new AppBadRequestHttpException(errors: $errors, code: JsonResponse::HTTP_BAD_REQUEST);
         }
 
         $this->em->persist($user);

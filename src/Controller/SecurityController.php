@@ -2,12 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Model\SecurityModel;
 use App\Service\SecurityService;
+use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -41,7 +40,7 @@ class SecurityController extends AbstractController
                 $params['email'],
                 $params['password'],
             );
-        } catch (BadRequestHttpException $ex) {
+        } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], JsonResponse::HTTP_BAD_REQUEST);
         }
 
@@ -54,7 +53,7 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'login_user', methods: ['POST'])]
     #[OA\Tag(name: 'security')]
     #[OA\Response(
-        response: JsonResponse::HTTP_ACCEPTED,
+        response: JsonResponse::HTTP_OK,
         description: "Returned when user login",
     )]
     #[OA\Response(
@@ -72,13 +71,13 @@ class SecurityController extends AbstractController
                 $params['email'],
                 $params['password'],
             );
-        } catch (BadRequestHttpException $ex) {
+        } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
         
         return new JsonResponse(
             ['token' => $token], 
-            JsonResponse::HTTP_ACCEPTED
+            JsonResponse::HTTP_OK
         );
     }
 }
