@@ -21,7 +21,7 @@ class News
     private string $name;
 
     #[ORM\Column(type: Types::TEXT)]
-    private $body;
+    private string $body;
 
     #[ORM\ManyToOne(
         targetEntity: User::class, 
@@ -58,7 +58,7 @@ class News
         return $this;
     }
 
-    public function getBody(): ?string
+    public function getBody(): string
     {
         return $this->body;
     }
