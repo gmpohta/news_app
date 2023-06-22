@@ -9,6 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Callback;
 
 
 class PatchNewsModel extends AbstractType
@@ -18,15 +19,18 @@ class PatchNewsModel extends AbstractType
         $builder
             ->add('name', null, [])
             ->add('body', null, [])
+            /*->addEventListener(
+
+                'constraints' => [new Callback([$this, 'validate'])]
+            
+            )*/
         ;
     }
 
     #[Assert\Callback]
     public function validate(ExecutionContextInterface $context, $payload)
     {
-        $form = $context->getRoot();
-        dump($form);
-        if ($this->getName() && $this->getBody())
+        if (empty($context->getName()) && empty($context->getBody()))
             $context->buildViolation('All parameters cannot be empty at the same time.')
                 ->addViolation();
 

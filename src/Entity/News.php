@@ -18,10 +18,10 @@ class News
     private $id;
 
     #[ORM\Column(length: 255, type: Types::STRING)]
-    private string $name;
+    private ?string $name;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $body;
+    private ?string $body;
 
     #[ORM\ManyToOne(
         targetEntity: User::class, 
@@ -33,6 +33,12 @@ class News
         onDelete: "CASCADE"
     )]
     private User $user;
+    
+    public function __construct()
+    {
+        $this->name = null;
+        $this->body = null;
+    }
 
     public function getId(): int
     {
@@ -46,24 +52,24 @@ class News
         return $this;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getBody(): string
+    public function getBody(): ?string
     {
         return $this->body;
     }
 
-    public function setBody(string $body): self
+    public function setBody(?string $body): self
     {
         $this->body = $body;
 
