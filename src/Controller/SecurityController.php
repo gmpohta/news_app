@@ -34,7 +34,7 @@ class SecurityController extends AbstractController
     )]
     public function register(Request $request): JsonResponse
     {
-        $params = json_decode($request->getContent(), true);
+        $params = json_decode($request->getContent(), true);//add validate input
         try {
             $token = $this->securityService->regiserUser(
                 $params['email'],
@@ -65,7 +65,7 @@ class SecurityController extends AbstractController
     )]
     public function login(Request $request): JsonResponse
     {
-        $params = json_decode($request->getContent(), true);
+        $params = json_decode($request->getContent(), true); //add validate input
         try {
             $token = $this->securityService->loginUser(
                 $params['email'],

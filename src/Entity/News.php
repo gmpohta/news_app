@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity]
@@ -16,9 +17,11 @@ class News
     #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255, type: Types::STRING)]
     private string $name;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::TEXT)]
     private $body;
 

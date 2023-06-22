@@ -28,7 +28,7 @@ class NewsService
         ]);
 
         if (empty($user)) {
-            throw new AppBadRequestHttpException(errors: ['User not found'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
         }
 
         $news = new News();
@@ -55,9 +55,78 @@ class NewsService
         return true;
     }
 
-    public function deleteEntity(News $news): void
+    public function patchNews(?string $name, ?string $body, int $newsId): ?bool
     {
+        $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
+        $user = $this->em->getRepository(User::class)->findOneBy([
+            'email' => $decodedJwtToken['email']
+        ]);
+
+        if (empty($user)) {
+            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $news = $this->em->getRepository(News::class)->findOneById($newsId);
+
+        if (empty($news)) {
+            throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        if ($news->getUser()->getEmail() != $decodedJwtToken['email']) {
+            throw new AppBadRequestHttpException(errors: [sprintf("You can't edit news with id %d. Access denied.", $newsId)], code: JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        if ($name) {
+            $news->setName($name);
+        }
+
+        if ($body) {
+            $news->setBody($body);
+        }
+        
+        $violations = $this->validator->validate($news);
+
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = [
+                    $violation->getPropertyPath() => $violation->getMessage()
+                ];
+            }
+
+            throw new AppBadRequestHttpException(errors: $errors, code: JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $this->em->persist($news);
+        $this->em->flush();
+
+        return true;
+    }
+
+    public function deleteNews(int $newsId): ?bool
+    {
+        $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
+        $user = $this->em->getRepository(User::class)->findOneBy([
+            'email' => $decodedJwtToken['email']
+        ]);
+
+        if (empty($user)) {
+            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $news = $this->em->getRepository(News::class)->findOneById($newsId);
+
+        if (empty($news)) {
+            throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        if ($news->getUser()->getEmail() != $decodedJwtToken['email']) {
+            throw new AppBadRequestHttpException(errors: [sprintf("You can't delete news with id %d. Access denied.", $newsId)], code: JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
         $this->em->remove($news);
         $this->em->flush();
+
+        return true;
     }
 }

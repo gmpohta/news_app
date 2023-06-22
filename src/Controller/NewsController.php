@@ -22,7 +22,7 @@ class NewsController extends AbstractController
         private NewsService $newsService
     ) {}
     
-    #[Route('/read/{news}', methods: ['GET'])] 
+    #[Route('/read/{newsId}', methods: ['GET'])] 
     #[OA\Tag(name: 'news')]
     #[OA\Response(
         response: JsonResponse::HTTP_NOT_FOUND,
@@ -33,9 +33,10 @@ class NewsController extends AbstractController
         description: "Returned when success",
         content: new Model(type: NewsModel::class)
     )]
-    public function readNewsById(Request $request, int $news): JsonResponse
+    public function readNewsById(Request $request, int $newsId): JsonResponse
     {
-        if (empty($news)) {
+        //add validate input
+        if (empty($newsId)) {
             return new JsonResponse('News not found.', JsonResponse::HTTP_NOT_FOUND);
         }
         return new JsonResponse($news, JsonResponse::HTTP_OK);
@@ -54,9 +55,20 @@ class NewsController extends AbstractController
     )]
     public function readNews(Request $request): JsonResponse
     {
-        $data = $this->em->getRepository(News::class)->getNews($queryParam, $limit, $offset);
-
-        return new JsonResponse($data, JsonResponse::HTTP_OK);
+        $params = json_decode($request->getContent(), true); //add validate input
+        try {
+            $success = $this->newsService->getNews(
+                $params['userId'],
+                $params['limit'],
+                $params['offset'],
+            );
+        } catch (AppBadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
+        }
+        
+        return new JsonResponse([
+            'success' => $success
+        ], JsonResponse::HTTP_OK);
     }
 
     #[Route('/create', methods: ['POST'])] 
@@ -79,7 +91,7 @@ class NewsController extends AbstractController
     )]
     public function createNews(Request $request)
     {
-        $params = json_decode($request->getContent(), true); ///???????????
+        $params = json_decode($request->getContent(), true); //add validate input
         try {
             $success = $this->newsService->createNews(
                 $params['name'],
@@ -94,7 +106,7 @@ class NewsController extends AbstractController
         ], JsonResponse::HTTP_CREATED);
     }
 
-    #[Route('/edit/{news}', methods: ['PATCH'])] 
+    #[Route('/patch/{newsId}', methods: ['PATCH'])] 
     #[OA\Tag(name: 'news')]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
@@ -116,12 +128,25 @@ class NewsController extends AbstractController
         description: 'Edit news',
         content: new Model(type: NewsModel::class)
     )]
-    public function updateNews(Request $request, News $news)
+    public function patchNews(Request $request, int $newsId)
     {    
-        return new JsonResponse(['edit'], JsonResponse::HTTP_OK);
+        $params = json_decode($request->getContent(), true); //add validate input
+        try {
+            $success = $this->newsService->patchNews(
+                $params['name'],
+                $params['body'],
+                $newsId
+            );
+        } catch (AppBadRequestHttpException $ex) {
+            return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
+        }
+        
+        return new JsonResponse([
+            'success' => $success
+        ], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/delete/{news}', methods: ['DELETE'])] 
+    #[Route('/delete/{newsId}', methods: ['DELETE'])] 
     #[OA\Tag(name: 'news')]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
@@ -135,22 +160,17 @@ class NewsController extends AbstractController
         response: JsonResponse::HTTP_OK,
         description: "Returned when new news is success deleted",
     )]
-    public function deleteNews(Request $request, News $news)
+    public function deleteNews(Request $request, int $newsId)
     {
-        $params = json_decode($request->getContent(), true); ///???????????
+        //add validate input
         try {
-            $success = $this->newsService->createNews(
-                $params['name'],
-                $params['body'],
-            );
+            $success = $this->newsService->deleteNews($newsId);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
         }
         
         return new JsonResponse([
             'success' => $success
-            ], JsonResponse::HTTP_CREATED
-        );
-        return new JsonResponse($this->newsService->delete($news), JsonResponse::HTTP_OK);
+        ], JsonResponse::HTTP_OK);
     }
 }
