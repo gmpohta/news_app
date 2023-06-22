@@ -41,7 +41,10 @@ class SecurityService
                 ];
             }
 
-            throw new AppBadRequestHttpException(errors: $errors, code: JsonResponse::HTTP_BAD_REQUEST);
+            throw new AppBadRequestHttpException(
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
+            );
         }
 
         $this->em->persist($user);
@@ -60,11 +63,17 @@ class SecurityService
         ;
 
         if (empty($user)) {
-            throw new AppBadRequestHttpException(errors: ['User not found'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: ['User not found'], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
-            throw new AppBadRequestHttpException(errors: ['Invalid credentials'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: ['Invalid credentials'], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         return $this->jwtManager->create($user);

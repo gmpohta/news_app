@@ -33,7 +33,10 @@ class NewsService
         ]);
 
         if (empty($user)) {
-            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: ['Current user not found. Maybe you access token is not valid'], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         $news = new News();
@@ -51,7 +54,10 @@ class NewsService
                 ];
             }
 
-            throw new AppBadRequestHttpException(errors: $errors, code: JsonResponse::HTTP_BAD_REQUEST);
+            throw new AppBadRequestHttpException(
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
+            );
         }
 
         $this->em->persist($news);
@@ -68,17 +74,26 @@ class NewsService
         ]);
 
         if (empty($user)) {
-            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: ['Current user not found. Maybe you access token is not valid'], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
         if (empty($news)) {
-            throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: [sprintf('News with id %d not found', $newsId)], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         if ($news->getUser()->getEmail() != $decodedJwtToken['email']) {
-            throw new AppBadRequestHttpException(errors: [sprintf("You can't edit news with id %d. Access denied.", $newsId)], code: JsonResponse::HTTP_UNAUTHORIZED);
+            throw new AppBadRequestHttpException(
+                errors: [sprintf("You can't edit news with id %d. Access denied.", $newsId)], 
+                code: JsonResponse::HTTP_UNAUTHORIZED
+            );
         }
 
         if ($name) {
@@ -99,7 +114,10 @@ class NewsService
                 ];
             }
 
-            throw new AppBadRequestHttpException(errors: $errors, code: JsonResponse::HTTP_BAD_REQUEST);
+            throw new AppBadRequestHttpException(
+                errors: $errors, 
+                code: JsonResponse::HTTP_BAD_REQUEST
+            );
         }
 
         $this->em->persist($news);
@@ -116,17 +134,26 @@ class NewsService
         ]);
 
         if (empty($user)) {
-            throw new AppBadRequestHttpException(errors: ['Current user not found. Maybe you access token is not valid'], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: ['Current user not found. Maybe you access token is not valid'], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
         if (empty($news)) {
-            throw new AppBadRequestHttpException(errors: [sprintf('News with id %d not found', $newsId)], code: JsonResponse::HTTP_NOT_FOUND);
+            throw new AppBadRequestHttpException(
+                errors: [sprintf('News with id %d not found', $newsId)], 
+                code: JsonResponse::HTTP_NOT_FOUND
+            );
         }
 
         if ($news->getUser()->getEmail() != $decodedJwtToken['email']) {
-            throw new AppBadRequestHttpException(errors: [sprintf("You can't delete news with id %d. Access denied.", $newsId)], code: JsonResponse::HTTP_UNAUTHORIZED);
+            throw new AppBadRequestHttpException(
+                errors: [sprintf("You can't delete news with id %d. Access denied.", $newsId)], 
+                code: JsonResponse::HTTP_UNAUTHORIZED
+            );
         }
 
         $this->em->remove($news);
