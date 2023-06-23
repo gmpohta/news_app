@@ -46,8 +46,8 @@ class NewsService
             $news = $this->em->getRepository(News::class)
                 ->getNewsWithParam(
                     [
-                        $data['userEmail'],
-                        $data['userId']
+                        'userEmail' => $data['userEmail'],
+                        'userId' => $data['userId']
                     ], 
                     $data['limit'], 
                     $data['offset']

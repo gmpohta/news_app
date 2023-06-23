@@ -15,23 +15,22 @@ class NewsRepository extends EntityRepository
             $limit = self::MAX_LIMIT_QUERY_RESULTS;
         }
 
-        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
-        $queryBuilder->select('n')
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('n')
             ->from(News::class, 'n')
             ->join('n.user', 'usr')
         ;
 
-        if (!empty($param['userId'])) {
-            $queryBuilder->andWhere('usr.id IN (:user_id)');
-            $queryBuilder->setParameter('user_id', $param['userId']);
+        if (!empty($param['userId']) || !empty($param['userEmail'])) {
+            $qb->andWhere($qb->expr()->orX(
+               'usr.id IN (:userId)', 
+               'usr.email IN (:userEmail)'
+            ));
+            
+            $qb->setParameters($param);
         }
-
-        if (!empty($param['userEmail'])) {
-            $queryBuilder->andWhere('usr.email IN (:user_email)');
-            $queryBuilder->setParameter('user_email', $param['userEmail']);
-        }
-
-        return $queryBuilder
+        
+        return $qb
             ->addOrderBy('n.name', 'ASC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)
