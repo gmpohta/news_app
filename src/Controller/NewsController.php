@@ -57,7 +57,10 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: Response::HTTP_OK,
         description: "Returned when success",
-        content: new Model(type: News::class, groups: ["read_news"])
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref:  new Model(type: News::class, groups: ["read_news"]))
+        )
     )]
     #[OA\RequestBody(
         description: "You can filter the news by user.",
@@ -90,6 +93,7 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: Response::HTTP_CREATED,
         description: "Returned when new news is success created",
+        content: new Model(type: News::class, groups: ["read_news"])
     )]
     #[OA\RequestBody(
         description: "Create news",
@@ -126,6 +130,7 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: Response::HTTP_OK,
         description: "Returned when new news is success edited",
+        content: new Model(type: News::class, groups: ["read_news"])
     )]
     #[OA\RequestBody(
         description: "Edit news",

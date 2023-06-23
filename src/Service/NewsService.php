@@ -62,7 +62,7 @@ class NewsService
         return null;
     }
 
-    public function createNews(FormInterface $form): ?bool
+    public function createNews(FormInterface $form): ?string
     {
         $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
         $user = $this->em->getRepository(User::class)->findOneBy([
@@ -83,14 +83,16 @@ class NewsService
             $this->em->persist($news);
             $this->em->flush();
     
-            return true;
+            return $this->serializer->serialize($news, 'json', [
+                'groups' => ['read_news'],
+            ]);
         } 
 
         $this->utilsService->validateForm($form);
         return null;
     }
 
-    public function patchNews(FormInterface $form, int $newsId): ?bool
+    public function patchNews(FormInterface $form, int $newsId): ?string
     {
         $decodedJwtToken = $this->jwtManager->decode($this->tokenStorageInterface->getToken());
         $user = $this->em->getRepository(User::class)->findOneBy([
@@ -134,7 +136,9 @@ class NewsService
             $this->em->persist($news);
             $this->em->flush();
     
-            return true;
+            return $this->serializer->serialize($news, 'json', [
+                'groups' => ['read_news'],
+            ]);
         } 
 
         $this->utilsService->validateForm($form);
