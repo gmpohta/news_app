@@ -16,15 +16,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 
-#[Route('/api')] 
+#[Route("/api")] 
 class NewsController extends AbstractController
 {
     public function __construct(
         private NewsService $newsService
     ) {}
     
-    #[Route('/read/{newsId}', methods: ['GET'])] 
-    #[OA\Tag(name: 'news')]
+    #[Route("/read/{newsId}", methods: ["GET"])] 
+    #[OA\Tag(name: "news")]
     #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_NOT_FOUND,
@@ -33,6 +33,7 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when success",
+        content: new Model(type: News::class, groups: ["read_news"])
     )]
     public function readNewsById(Request $request, $newsId): JsonResponse
     {
@@ -47,8 +48,8 @@ class NewsController extends AbstractController
         ], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/read', methods: ['POST'])] 
-    #[OA\Tag(name: 'news')]
+    #[Route("/read", methods: ["POST"])] 
+    #[OA\Tag(name: "news")]
     #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_NOT_FOUND,
@@ -57,9 +58,10 @@ class NewsController extends AbstractController
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
         description: "Returned when success",
+        content: new Model(type: News::class, groups: ["read_news"])
     )]
     #[OA\RequestBody(
-        description: 'Create news',
+        description: "You can filter the news by user.",
         content: new Model(type: ReadNewsModel::class)
     )]
     public function readNews(Request $request): JsonResponse
@@ -78,8 +80,8 @@ class NewsController extends AbstractController
         ], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/create', methods: ['POST'])] 
-    #[OA\Tag(name: 'news')]
+    #[Route("/create", methods: ["POST"])] 
+    #[OA\Tag(name: "news")]
     #[OA\Response(
         response: JsonResponse::HTTP_BAD_REQUEST,
         description: "Returned when input data not valid",
@@ -93,7 +95,7 @@ class NewsController extends AbstractController
         description: "Returned when new news is success created",
     )]
     #[OA\RequestBody(
-        description: 'Create news',
+        description: "Create news",
         content: new Model(type: CreateNewsModel::class)
     )]
     public function createNews(Request $request)
@@ -112,8 +114,8 @@ class NewsController extends AbstractController
         ], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/patch/{newsId}', methods: ['PATCH'])] 
-    #[OA\Tag(name: 'news')]
+    #[Route("/patch/{newsId}", methods: ["PATCH"])] 
+    #[OA\Tag(name: "news")]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
         description: "Returned when authorization is required",
@@ -131,7 +133,7 @@ class NewsController extends AbstractController
         description: "Returned when new news is success edited",
     )]
     #[OA\RequestBody(
-        description: 'Edit news',
+        description: "Edit news",
         content: new Model(type: PatchNewsModel::class)
     )]
     public function patchNews(Request $request, $newsId)
@@ -150,8 +152,8 @@ class NewsController extends AbstractController
         ], JsonResponse::HTTP_OK);
     }
 
-    #[Route('/delete/{newsId}', methods: ['DELETE'])] 
-    #[OA\Tag(name: 'news')]
+    #[Route("/delete/{newsId}", methods: ["DELETE"])] 
+    #[OA\Tag(name: "news")]
     #[OA\Response(
         response: JsonResponse::HTTP_UNAUTHORIZED,
         description: "Returned when authorization is required",

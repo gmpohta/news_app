@@ -7,10 +7,12 @@ use Doctrine\ORM\EntityRepository;
 
 class NewsRepository extends EntityRepository
 {
+    private const MAX_LIMIT_QUERY_RESULTS = 1000;
+
     public function getNewsWithParam(?array $param, ?int $limit = 100, ?int $offset = 0): ?array 
     {
-        if ($limit > 1000) {
-            $limit = 1000;
+        if ($limit > self::MAX_LIMIT_QUERY_RESULTS) {
+            $limit = self::MAX_LIMIT_QUERY_RESULTS;
         }
 
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();

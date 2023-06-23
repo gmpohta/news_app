@@ -6,6 +6,7 @@ use App\Repository\NewsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 #[ORM\Table(name:"news")]
@@ -13,16 +14,19 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 class News
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
     #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
+    #[Groups("read_news")]
     #[ORM\Column(length: 255, type: Types::STRING)]
     private ?string $name;
 
+    #[Groups("read_news")]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $body;
 
+    #[Groups("read_news")]
     #[ORM\ManyToOne(
         targetEntity: User::class, 
         inversedBy: "news", 

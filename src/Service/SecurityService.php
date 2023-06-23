@@ -19,7 +19,7 @@ class SecurityService
         private UtilsService $utilsService,
     ) {}
 
-    public function regiserUser(FormInterface $form): string
+    public function regiserUser(FormInterface $form): ?string
     {
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
@@ -37,9 +37,10 @@ class SecurityService
         } 
 
         $this->utilsService->validateForm($form);
+        return null;
     }
 
-    public function loginUser(FormInterface $form): string
+    public function loginUser(FormInterface $form): ?string
     {
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $form->getData();
@@ -69,5 +70,6 @@ class SecurityService
         } 
 
         $this->utilsService->validateForm($form);
+        return null;
     }
 }

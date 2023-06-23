@@ -20,7 +20,7 @@ class NewsService
         private UtilsService $utilsService,
     ) {}
     
-    public function getNewsById(int $newsId): ?array
+    public function getNewsById(int $newsId): ?News
     {
         $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
@@ -40,13 +40,17 @@ class NewsService
 
             return $this->em->getRepository(News::class)
                 ->getNewsWithParam(
-                    [], 
+                    [
+                        $data['userEmail'],
+                        $data['userId']
+                    ], 
                     $data['limit'], 
                     $data['offset']
                 );
         } 
 
         $this->utilsService->validateForm($form);
+        return null;
     }
 
     public function createNews(FormInterface $form): ?bool
@@ -74,6 +78,7 @@ class NewsService
         } 
 
         $this->utilsService->validateForm($form);
+        return null;
     }
 
     public function patchNews(FormInterface $form, int $newsId): ?bool
@@ -124,6 +129,7 @@ class NewsService
         } 
 
         $this->utilsService->validateForm($form);
+        return null;
     }
 
     public function deleteNews(int $newsId): ?bool

@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Model\Security\SecurityRegisterModel;
-use App\Model\Security\SecurityLoginModel;
+use App\Model\Security\RegisterSecurityModel;
+use App\Model\Security\LoginSecurityModel;
 use App\Service\SecurityService;
 use App\Exception\AppBadRequestHttpException;
 use App\Entity\User;
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 
-#[Route('/auth')] 
+#[Route("/auth")] 
 class SecurityController extends AbstractController
 {
     public function __construct(
@@ -23,7 +23,7 @@ class SecurityController extends AbstractController
     ) {}
 
     #[Route("/register", name: "register_user", methods: ["POST"])]
-    #[OA\Tag(name: 'security')]
+    #[OA\Tag(name: "security")]
     #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_CREATED,
@@ -34,11 +34,11 @@ class SecurityController extends AbstractController
         description: "Returned when input data not valid",
     )]
     #[OA\RequestBody(
-        content: new Model(type: SecurityRegisterModel::class)
+        content: new Model(type: RegisterSecurityModel::class)
     )]
     public function register(Request $request): JsonResponse
     {
-        $form = $this->createForm(SecurityRegisterModel::class, new User);
+        $form = $this->createForm(RegisterSecurityModel::class, new User);
         $form->submit(json_decode($request->getContent(), true));
 
         try {
@@ -52,8 +52,8 @@ class SecurityController extends AbstractController
         ], JsonResponse::HTTP_CREATED);
     }
     
-    #[Route('/login', name: 'login_user', methods: ['POST'])]
-    #[OA\Tag(name: 'security')]
+    #[Route("/login", name: "login_user", methods: ["POST"])]
+    #[OA\Tag(name: "security")]
     #[Security(name: null)]
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
@@ -64,11 +64,11 @@ class SecurityController extends AbstractController
         description: "Returned when input data not valid",
     )]
     #[OA\RequestBody(
-        content: new Model(type: SecurityLoginModel::class)
+        content: new Model(type: LoginSecurityModel::class)
     )]
     public function login(Request $request): JsonResponse
     {
-        $form = $this->createForm(SecurityLoginModel::class);
+        $form = $this->createForm(LoginSecurityModel::class);
         $form->submit(json_decode($request->getContent(), true));
 
         try {
