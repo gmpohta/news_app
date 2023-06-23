@@ -7,6 +7,7 @@ use App\Model\News\CreateNewsModel;
 use App\Model\News\PatchNewsModel;
 use App\Model\News\ReadNewsModel;
 use App\Service\NewsService;
+use App\Service\UtilsService;
 use App\Exception\AppBadRequestHttpException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +22,8 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 class NewsController extends AbstractController
 {
     public function __construct(
-        private NewsService $newsService
+        private NewsService $newsService,
+        private UtilsService $utilsService
     ) {}
     
     #[Route("/read/{newsId}", methods: ["GET"])] 
@@ -69,9 +71,12 @@ class NewsController extends AbstractController
     public function readNews(Request $request): Response
     {
         $form = $this->createForm(ReadNewsModel::class);
-        $form->submit(json_decode($request->getContent(), true));
         
         try {
+            $form->submit(
+                $this->utilsService->validateAndDecodeJson($request)
+            );
+
             $data = $this->newsService->getNewsWithParam($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
@@ -102,9 +107,12 @@ class NewsController extends AbstractController
     public function createNews(Request $request): Response
     {
         $form = $this->createForm(CreateNewsModel::class, new News);
-        $form->submit(json_decode($request->getContent(), true));
 
         try {
+            $form->submit(
+                $this->utilsService->validateAndDecodeJson($request)
+            );
+
             $data = $this->newsService->createNews($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
@@ -139,9 +147,12 @@ class NewsController extends AbstractController
     public function patchNews(Request $request, $newsId): Response
     {    
         $form = $this->createForm(PatchNewsModel::class, new News);
-        $form->submit(json_decode($request->getContent(), true));
 
         try {
+            $form->submit(
+                $this->utilsService->validateAndDecodeJson($request)
+            );
+            
             $data = $this->newsService->patchNews($form, (int)$newsId);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());

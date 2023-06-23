@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Model\Security\RegisterSecurityModel;
 use App\Model\Security\LoginSecurityModel;
 use App\Service\SecurityService;
+use App\Service\UtilsService;
 use App\Exception\AppBadRequestHttpException;
 use App\Entity\User;
 use OpenApi\Attributes as OA;
@@ -19,7 +20,8 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 class SecurityController extends AbstractController
 {
     public function __construct(
-        private SecurityService $securityService
+        private SecurityService $securityService,
+        private UtilsService $utilsService
     ) {}
 
     #[Route("/register", name: "register_user", methods: ["POST"])]
@@ -39,9 +41,12 @@ class SecurityController extends AbstractController
     public function register(Request $request): JsonResponse
     {
         $form = $this->createForm(RegisterSecurityModel::class, new User);
-        $form->submit(json_decode($request->getContent(), true));
-
+        
         try {
+            $form->submit(
+                $this->utilsService->validateAndDecodeJson($request)
+            );
+
             $token = $this->securityService->regiserUser($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
@@ -69,9 +74,12 @@ class SecurityController extends AbstractController
     public function login(Request $request): JsonResponse
     {
         $form = $this->createForm(LoginSecurityModel::class);
-        $form->submit(json_decode($request->getContent(), true));
-
+        
         try {
+            $form->submit(
+                $this->utilsService->validateAndDecodeJson($request)
+            );
+
             $token = $this->securityService->loginUser($form);
         } catch (AppBadRequestHttpException $ex) {
             return new JsonResponse(['errors' => $ex->getErrors()], $ex->getCode());
