@@ -10,6 +10,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class NewsService
 {
@@ -18,9 +19,10 @@ class NewsService
         private JWTTokenManagerInterface $jwtManager,
         private TokenStorageInterface $tokenStorageInterface,
         private UtilsService $utilsService,
+        private SerializerInterface $serializer,
     ) {}
     
-    public function getNewsById(int $newsId): ?News
+    public function getNewsById(int $newsId): ?string
     {
         $news = $this->em->getRepository(News::class)->findOneBy(['id' => $newsId]);
 
@@ -30,15 +32,18 @@ class NewsService
                 code: JsonResponse::HTTP_NOT_FOUND
             );
         }
-        return $news;
+
+        return $this->serializer->serialize($news, 'json', [
+            'groups' => ['read_news'],
+        ]);
     }
 
-    public function getNewsWithParam(FormInterface $form): ?array
+    public function getNewsWithParam(FormInterface $form): ?string
     {
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            return $this->em->getRepository(News::class)
+            $news = $this->em->getRepository(News::class)
                 ->getNewsWithParam(
                     [
                         $data['userEmail'],
@@ -47,6 +52,10 @@ class NewsService
                     $data['limit'], 
                     $data['offset']
                 );
+
+            return $this->serializer->serialize($news, 'json', [
+                'groups' => ['read_news'],
+            ]);
         } 
 
         $this->utilsService->validateForm($form);

@@ -18,7 +18,7 @@ class NewsRepository extends EntityRepository
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('n')
             ->from(News::class, 'n')
-            ->join('n.user', 'usr');
+            ->join('n.user', 'usr')
         ;
 
         if (!empty($param['userId'])) {
